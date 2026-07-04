@@ -1,0 +1,74 @@
+.schedule-grid-wrapper {
+  max-height: 65vh;
+  overflow-y: auto;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+}
+
+.schedule-grid {
+  display: grid;
+  user-select: none;
+  min-width: 480px;
+}
+
+.grid-corner {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  background: #fafafa;
+  border-bottom: 1px solid #d0d0d0;
+  border-right: 1px solid #d0d0d0;
+}
+
+.day-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #fafafa;
+  border-bottom: 1px solid #d0d0d0;
+  border-right: 1px solid #eee;
+  text-align: center;
+  font-weight: 600;
+  padding: 8px 4px;
+  font-size: 14px;
+}
+
+.time-label {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #fafafa;
+  border-right: 1px solid #d0d0d0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 11px;
+  color: #666;
+  text-align: right;
+  padding: 0 6px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.time-label.hour {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.slot-cell {
+  height: 18px;
+  border-bottom: 1px solid #f2f2f2;
+  border-right: 1px solid #f2f2f2;
+  background-color: #ffffff;
+}
+
+.slot-cell.half-hour {
+  border-bottom: 1px dashed #f2f2f2;
+}
+
+.slot-cell.interactive {
+  cursor: pointer;
+}
+
+.slot-cell.interactive:hover {
+  outline: 1px solid #90a4ae;
+  outline-offset: -1px;
+}
