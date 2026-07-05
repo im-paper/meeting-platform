@@ -66,15 +66,40 @@ export function computeAggregate(participants, availability, day, slotIndex) {
   return { available, maybe, unavailable, total: participants.length };
 }
 
-// 3단계 색상 시각화: 옅음(적음) / 보통 / 진함(많음)
-export function getAggregateColor({ available, maybe, total }) {
+function lerp(a, b, t) {
+  return Math.round(a + (b - a) * t);
+}
+
+// 겹쳐보기 히트맵: 가능한 인원이 많을수록 초록이 진해진다.
+// 아무도 가능하지 않으면 흰색, 전원 가능하면 가장 진한 초록.
+export function getAggregateColor({ available, maybe, unavailable, total }) {
   if (total === 0) return '#ffffff';
   const score = available + maybe * 0.5;
   const ratio = score / total;
-  if (ratio <= 0) return '#ffffff';
-  if (ratio <= 0.34) return '#c8e6c9';
-  if (ratio <= 0.67) return '#66bb6a';
-  return '#1b5e20';
+  if (ratio <= 0) {
+    // 아무도 가능하지 않음: 불가능 표시가 하나라도 있으면 옅은 빨강, 아니면 흰색
+    return unavailable > 0 ? '#fdeaea' : '#ffffff';
+  }
+  const light = [200, 230, 201]; // #c8e6c9
+  const dark = [27, 94, 32]; // #1b5e20
+  const r = lerp(light[0], dark[0], ratio);
+  const g = lerp(light[1], dark[1], ratio);
+  const b = lerp(light[2], dark[2], ratio);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+export function computeParticipantSummary(availability, participantId) {
+  const data = availability[participantId];
+  const summary = { available: 0, maybe: 0, unavailable: 0 };
+  if (!data) return summary;
+  DAYS.forEach((day) => {
+    (data[day] || []).forEach((status) => {
+      if (status === STATUS.AVAILABLE) summary.available++;
+      else if (status === STATUS.MAYBE) summary.maybe++;
+      else if (status === STATUS.UNAVAILABLE) summary.unavailable++;
+    });
+  });
+  return summary;
 }
 
 export function getAggregateTitle({ available, maybe, unavailable, total }) {
