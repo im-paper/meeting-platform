@@ -21,7 +21,7 @@ function ParticipantManager({
             className="participant-name-input"
             value={p.name}
             onChange={(e) => onRename(p.id, e.target.value)}
-            onClick={(e) => e.stopPropagation()}
+            onFocus={() => onSelect(p.id)}
           />
           {participants.length > 1 && (
             <button

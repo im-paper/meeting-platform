@@ -3,6 +3,7 @@ import './App.css';
 import ParticipantManager from './components/ParticipantManager';
 import BrushSelector from './components/BrushSelector';
 import ScheduleGrid from './components/ScheduleGrid';
+import CollapsibleSchedule from './components/CollapsibleSchedule';
 import {
   STATUS,
   STATUS_COLOR,
@@ -42,7 +43,20 @@ function App() {
     () => loadInitialState().participants[0]?.id
   );
   const [brush, setBrush] = useState(STATUS.AVAILABLE);
-  const [mode, setMode] = useState('input'); // 'input' | 'result'
+  const [mode, setMode] = useState('input'); // 'input' | 'compare' | 'result'
+  const [openPanels, setOpenPanels] = useState(() => new Set());
+
+  const togglePanel = (id) => {
+    setOpenPanels((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const expandAll = () => setOpenPanels(new Set(participants.map((p) => p.id)));
+  const collapseAll = () => setOpenPanels(new Set());
 
   useEffect(() => {
     window.localStorage.setItem(
@@ -131,14 +145,21 @@ function App() {
           </button>
           <button
             type="button"
+            className={`mode-tab ${mode === 'compare' ? 'active' : ''}`}
+            onClick={() => setMode('compare')}
+          >
+            개별 비교
+          </button>
+          <button
+            type="button"
             className={`mode-tab ${mode === 'result' ? 'active' : ''}`}
             onClick={() => setMode('result')}
           >
-            결과 보기
+            전체 겹쳐보기
           </button>
         </div>
 
-        {mode === 'input' ? (
+        {mode === 'input' && (
           <>
             <div className="input-toolbar">
               <span className="active-participant-label">
@@ -158,19 +179,47 @@ function App() {
               onPaintCell={paintCell}
             />
           </>
-        ) : (
+        )}
+
+        {mode === 'compare' && (
           <>
+            <div className="compare-toolbar">
+              <p className="hint-text">
+                참여자 이름을 눌러 스케줄을 펼치거나 접어서 비교하세요.
+              </p>
+              <div className="compare-actions">
+                <button type="button" className="ghost-btn" onClick={expandAll}>
+                  모두 펼치기
+                </button>
+                <button type="button" className="ghost-btn" onClick={collapseAll}>
+                  모두 접기
+                </button>
+              </div>
+            </div>
+            {participants.map((p) => (
+              <CollapsibleSchedule
+                key={p.id}
+                participant={p}
+                availability={availability}
+                isOpen={openPanels.has(p.id)}
+                onToggle={togglePanel}
+              />
+            ))}
+          </>
+        )}
+
+        {mode === 'result' && (
+          <>
+            <p className="hint-text">
+              모두의 일정을 겹쳤을 때 가능한 인원이 많을수록 초록색이 진해집니다. 칸에
+              마우스를 올리면 인원별 상세를 볼 수 있어요.
+            </p>
             <div className="legend">
-              {[
-                { label: '적음', color: '#c8e6c9' },
-                { label: '보통', color: '#66bb6a' },
-                { label: '많음', color: '#1b5e20' },
-              ].map((item) => (
-                <span key={item.label} className="legend-item">
-                  <span className="legend-swatch" style={{ backgroundColor: item.color }} />
-                  {item.label}
-                </span>
-              ))}
+              <span className="legend-gradient" aria-hidden="true" />
+              <span className="legend-scale">
+                <span>0명 가능</span>
+                <span>전원 가능</span>
+              </span>
             </div>
             <ScheduleGrid
               interactive={false}
